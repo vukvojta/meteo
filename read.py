@@ -8,6 +8,9 @@ vane_table = [5, 3, 4, 7, 6, 9, 8, 1, 2, 11, 10, 15, 0, 13, 14, 12]  # voltage -
 interval_sec = 10
 interval_min = 5
 
+wind_factor = 2.4  # impulse -> km/h
+rain_factor = 0.2794  # impulse -> mm
+
 
 class Counter(Button):
     def __init__(self, pin):
@@ -41,27 +44,12 @@ def main():
 
     count = count_gas = 0
     temperature_sum = pressure_sum = humidity_sum = gas_resistance_sum = 0
-    # rain_lap = wind_lap = 0
-    tt = t = datetime.now()
+    rain_lap = wind_lap = 0
+    tt = t = lt = datetime.now()
     sleep((interval_sec - t.second % interval_sec) - t.microsecond / 1000000.0)
     while True:
         t = datetime.now()
         # work begin
-        if t.second == 0 and t.minute % interval_min == 0:
-            dt = (t - tt).total_seconds()
-            rain_count = rain_sensor.reset()
-            wind_count = wind_speed_sensor.reset()
-            print "#"*40
-            print (u"{:%Y-%m-%d %H:%M:%S} {:6.2f}\N{DEGREE SIGN}C, {:7.2f} hPa, {:5.2f} %RH, {:6} Ohms"
-                u", {:7.4f} mm, {:6.2f} km/h".format(
-                t, temperature_sum/count if count else 0, pressure_sum/count if count else 0, humidity_sum/count if count else 0,
-                gas_resistance_sum/count_gas if count_gas else 0, rain_count/dt, wind_count/dt))
-            print "#"*40
-            tt = t
-            count = count_gas = 0
-            temperature_sum = pressure_sum = humidity_sum = gas_resistance_sum = 0
-            # rain_lap = rain_count
-            # wind_lap = wind_count
         if sensor.get_sensor_data():
             count += 1
             temperature, pressure, humidity = sensor.data.temperature, sensor.data.pressure, sensor.data.humidity
@@ -72,10 +60,33 @@ def main():
                 count_gas += 1
                 gas_resistance = sensor.data.gas_resistance
                 gas_resistance_sum += gas_resistance
-            print (u"{:%Y-%m-%d %H:%M:%S.%f} {:6.2f}\N{DEGREE SIGN}C, {:7.2f} hPa, {:5.2f} %RH, {:6} Ohms".format(
-                t, temperature, pressure, humidity, gas_resistance if count_gas else 0))
-            # u", {:7.4f} mm, {:6.2f} km/h".format(
-            # , rain_count, wind_count / dt))
+                rain_count = rain_sensor.count
+                wind_count = wind_speed_sensor.count
+                dt = (t - lt).total_seconds()
+                print (u"{:%Y-%m-%d %H:%M:%S.%f} {:6.2f}\N{DEGREE SIGN}C, {:7.2f} hPa, {:5.2f} %RH, {:6} Ohms"
+                       u", {:7.4f} mm, {:6.2f} km/h".format(t, temperature, pressure, humidity,
+                                                            gas_resistance if count_gas else 0,
+                                                            (rain_count - rain_lap)*rain_factor,
+                                                            (wind_count - wind_lap)*wind_factor/dt))
+                rain_lap = rain_count
+                wind_lap = wind_count
+                lt = t
+        if t.second == 0 and t.minute % interval_min == 0:
+            dt = (t - tt).total_seconds()
+            rain_count = rain_sensor.reset()
+            wind_count = wind_speed_sensor.reset()
+            rain_lap = wind_lap = 0
+            print "#"*40
+            print (u"{:%Y-%m-%d %H:%M:%S} {:6.2f}\N{DEGREE SIGN}C, {:7.2f} hPa, {:5.2f} %RH, {:6} Ohms"
+                   u", {:7.4f} mm, {:6.2f} km/h".format(t, temperature_sum/count if count else 0,
+                                                        pressure_sum/count if count else 0,
+                                                        humidity_sum/count if count else 0,
+                                                        gas_resistance_sum/count_gas if count_gas else 0,
+                                                        rain_count*rain_factor, wind_count*wind_factor/dt))
+            print "#"*40
+            tt = t
+            count = count_gas = 0
+            temperature_sum = pressure_sum = humidity_sum = gas_resistance_sum = 0
         # work end
         t = datetime.now()
         sleep((interval_sec - t.second % interval_sec) - t.microsecond / 1000000.0)
