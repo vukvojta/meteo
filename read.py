@@ -78,19 +78,19 @@ def main():
                                   air_sum.pressure + air_data.pressure,
                                   air_sum.humidity + air_data.humidity,
                                   air_sum.gas_resistance + (air_data.gas_resistance if air_data.gas_resistance else 0))
-                print(u"{:%Y-%m-%d %H:%M:%S.%f} {:6.2f}\N{DEGREE SIGN}C, {:7.2f} hPa, {:5.2f} %RH, {:6} Ohms".format(
-                    t, *air_data))
-                # work end
                 if t.second == 0 and t.minute % interval_min == 0:
                     break
+                print(u"{0:%Y-%m-%d %H:%M:%S.%f} "
+                      u"{2:6.2f}\N{DEGREE SIGN}C, {3:7.2f} hPa, {4:5.2f} %RH, {5:6} Ohms {1:2d}"
+                      .format(t, count, *air_data))
+            # work end
             t = wait(interval_sec)
         # work begin (t)
-        print(u"{:%Y-%m-%d %H:%M:%S.%f} {:6.2f}\N{DEGREE SIGN}C, {:7.2f} hPa, {:5.2f} %RH, {:6} Ohms *".format(
-            t, air_sum.temperature/count, air_sum.pressure/count, air_sum.humidity/count,
-            air_sum.gas_resistance/count_gas if count_gas else 0))
+        print(u"{:%Y-%m-%d %H:%M:%S.%f} "
+              u"{:6.2f}\N{DEGREE SIGN}C, {:7.2f} hPa, {:5.2f} %RH, {:6} Ohms *"
+              .format(t, air_sum.temperature/count, air_sum.pressure/count, air_sum.humidity/count,
+                      air_sum.gas_resistance/count_gas if count_gas else 0))
         # work end
-
-
 
     # temperature_sum = pressure_sum = humidity_sum = gas_resistance_sum = 0
     # count = count_gas = 0
