@@ -100,21 +100,23 @@ def main():
                                   air_sum.humidity + air_data.humidity,
                                   air_sum.gas_resistance + (air_data.gas_resistance if air_data.gas_resistance else 0))
                 if air_data.gas_resistance:
-                    air_string = u"{:6.2f}\N{DEGREE SIGN}C, {:7.2f} hPa, {:5.2f} %RH, {:6} Ohms".format(*air_data)
+                    air_string = u"{:6.2f}\N{DEGREE SIGN}C, {:7.2f} hPa, {:5.2f} %RH, {:7} Ohms".format(*air_data)
                 else:
-                    air_string = u"{:6.2f}\N{DEGREE SIGN}C, {:7.2f} hPa, {:5.2f} %RH, ------ Ohms".format(*air_data)
+                    air_string = u"{:6.2f}\N{DEGREE SIGN}C, {:7.2f} hPa, {:5.2f} %RH, ------- Ohms".format(*air_data)
             else:
-                air_string = u"------\N{DEGREE SIGN}C, ------- hPa, ----- %RH, ------ Ohms"
+                air_string = u"------\N{DEGREE SIGN}C, ------- hPa, ----- %RH, ------- Ohms"
             if t.second == 0 and t.minute % interval_min == 0:
                 break
-            print(u"{:%Y-%m-%d %H:%M:%S.%f}: {:s}, {:2.4f} mm, {:7.3f} km/h".format(t, air_string, rain_fall * rain_factor,
-                                                                                wind_speed * wind_factor / interval_sec))
+            print(u"{:%Y-%m-%d %H:%M:%S.%f}: {:s}, {:2.4f} mm, {:7.3f} km/h".format(
+                t, air_string, rain_fall * rain_factor, wind_speed * wind_factor / interval_sec))
             # work end
             t = wait(interval_sec)
         # work begin (t)
         print(u"{:%Y-%m-%d %H:%M:%S.%f}: "
-              u"{:6.2f}\N{DEGREE SIGN}C, {:7.2f} hPa, {:5.2f} %RH, {:6} Ohms, {:2.4f} mm, {:7.3f} km/h"
-              .format(t, air_sum.temperature / count_air, air_sum.pressure / count_air, air_sum.humidity / count_air,
+              u"{:6.2f}\N{DEGREE SIGN}C, {:7.2f} hPa, {:5.2f} %RH, {:7} Ohms, {:2.4f} mm, {:7.3f} km/h"
+              .format(t, air_sum.temperature / count_air if count_air else 0,
+                      air_sum.pressure / count_air if count_air else 0,
+                      air_sum.humidity / count_air if count_air else 0,
                       air_sum.gas_resistance / count_gas if count_gas else 0,
                       rain_fall_sum * rain_factor, wind_speed_sum * wind_factor / (count * interval_sec)))
         # work end

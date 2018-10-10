@@ -1,0 +1,5 @@
+bme680==1.0.5
+gpiozero==1.4.1
+psycopg2==2.7.5
+psycopg2-binary==2.7.5
+SQLAlchemy==1.2.12
